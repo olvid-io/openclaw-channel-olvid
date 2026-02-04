@@ -1,6 +1,6 @@
 {
   "name": "olvid-channel",
-  "version": "0.0.0a1",
+  "version": "0.0.0a2",
   "description": "Olvid native channel for OpenClaw.",
   "type": "module",
   "dependencies": {
