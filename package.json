@@ -1,6 +1,6 @@
 {
   "name": "olvid-channel",
-  "version": "0.0.0a0",
+  "version": "0.0.0a1",
   "description": "Olvid native channel for OpenClaw.",
   "type": "module",
   "dependencies": {
@@ -17,7 +17,9 @@
   ],
   "author": "bot@olvid.io",
   "openclaw": {
-    "extensions": ["./index.ts"],
+    "extensions": [
+      "./index.ts"
+    ],
     "channel": {
       "id": "olvid",
       "label": "olvid",
