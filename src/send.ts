@@ -1,8 +1,9 @@
-import { OlvidClient } from "@olvid/bot-node";
+import {datatypes, OlvidClient} from "@olvid/bot-node";
 import { ResolvedOlvidAccount, resolveOlvidAccount } from "./accounts.js";
 import { extractDiscussionIdFromTarget } from "./normalize.js";
 import { getOlvidRuntime } from "./runtime.js";
 import { CoreConfig } from "./types.js";
+import {messageIdFromString, messageIdToString} from "./tools";
 
 type OlvidSendOpts = {
   daemonUrl?: string;
@@ -23,7 +24,9 @@ export async function sendMessageOlvid(
   text: string,
   opts: OlvidSendOpts = {},
 ): Promise<OlvidSendResult> {
-  const cfg = getOlvidRuntime().config.loadConfig() as CoreConfig;
+  const runtime = getOlvidRuntime();
+  const logger = runtime.logging.getChildLogger({channel: "olvid", accountId: opts.accountId});
+  const cfg = runtime.config.loadConfig() as CoreConfig;
   let account: ResolvedOlvidAccount = resolveOlvidAccount({ cfg, accountId: opts.accountId });
 
   if (!text?.trim() && !opts.mediaUrls) {
@@ -37,12 +40,24 @@ export async function sendMessageOlvid(
     throw new Error(`Cannot parse discussion id: ${to}`);
   }
 
-  const message = await olvidClient.messageSend({ discussionId, body: text });
+  // TODO TODEL
+  logger.info(`sendMessageOlvid: ${opts.mediaUrls}`);
+  console.log(opts.mediaUrls);
+
+  let message: datatypes.Message;
+  if (opts.mediaUrls) {
+    let ret = await olvidClient.messageSendWithAttachmentsFiles({ discussionId, body: text, replyId: opts.replyTo ? messageIdFromString(opts.replyTo) : undefined, filesPath: opts.mediaUrls });
+    message = ret.message;
+  } else {
+    message = await olvidClient.messageSend({ discussionId, body: text, replyId: opts.replyTo ? messageIdFromString(opts.replyTo) : undefined });
+  }
   let result: OlvidSendResult = {
     messageId: message?.id?.toString() ?? "",
     discussionId: Number(message?.discussionId) ?? 0,
     timestamp: Number(message.timestamp),
   };
+
+  console.log(`message sent: ${messageIdToString(message.id)}`);
 
   getOlvidRuntime().channel.activity.record({
     channel: "olvid",

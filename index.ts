@@ -1,10 +1,9 @@
 import {
   type OpenClawPluginApi,
-  emptyPluginConfigSchema
+  emptyPluginConfigSchema,
 } from "openclaw/plugin-sdk";
 import {setOlvidRuntime} from "./src/runtime";
 import {olvidPlugin} from "./src/channel";
-
 
 const plugin: {id: string, name: string, description: string, configSchema: unknown, register: (api: OpenClawPluginApi) => void} = {
   id: "olvid",

@@ -56,6 +56,13 @@ class OpenClawBot extends OlvidClient {
 
   private async onMessageReceivedHandler(message: datatypes.Message) {
     const runtime = getOlvidRuntime();
+    const logger = runtime.logging.getChildLogger({
+      channel: "olvid",
+      accountId: this.account.accountId,
+    });
+
+    // TODO TODEL
+    logger.info("message received")
 
     // load metadata
     const discussion: datatypes.Discussion = await this.discussionGet({
@@ -136,7 +143,7 @@ class OpenClawBot extends OlvidClient {
       sessionKey: ctxPayload.SessionKey ?? route.sessionKey,
       ctx: ctxPayload,
       onRecordError: (err: unknown) => {
-        console.error?.(`olvid: failed updating session meta: ${String(err)}`);
+        logger.error(`olvid: failed updating session meta: ${String(err)}`);
       },
     });
 
@@ -158,7 +165,7 @@ class OpenClawBot extends OlvidClient {
           });
         },
         onError: (err, info) => {
-          console.error?.(`olvid ${info.kind} reply failed: ${String(err)}`);
+          logger.error?.(`olvid ${info.kind} reply failed: ${String(err)}`);
         },
       },
     });
