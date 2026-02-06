@@ -16,8 +16,7 @@ import {sendMessageOlvid} from "./send";
 import {monitorOlvidProvider} from "./monitor";
 import {olvidOnboardingAdapter} from "./onboarding";
 import {looksLikeOlvidTargetId, normalizeOlvidMessagingTarget} from "./normalize";
-import { Type } from "@sinclair/typebox";
-import {OlvidClient} from "@olvid/bot-node";
+import {olvidAgentTools} from "./agent_tools";
 
 export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
   id: "olvid",
@@ -37,7 +36,7 @@ export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
     reactions: true,
     threads: false,
     reply: true,
-    nativeCommands: true,
+    nativeCommands: false,
     blockStreaming: true
   },
   reload: { configPrefixes: ["channels.olvid"] },
@@ -172,33 +171,5 @@ export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
       ctx.setStatus({ accountId: ctx.accountId, lastStopAt: Date.now() });
     },
   },
-  agentTools: [{
-      name: "list_olvid_discussions",
-      label: "List Olvid Discussions",
-      description: "List Olvid available Olvid discussions. Returns a list of discussion with Id and Title.",
-      parameters: Type.Object({
-        accountId: Type.String()
-      }),
-      async execute(_id: string, params: unknown) {
-        const runtime = getOlvidRuntime();
-        let accountId = (params as {accountId: string}).accountId;
-
-        // Retrieve the configuration/credentials for the specific accountId
-        let olvidAccount: ResolvedOlvidAccount = resolveOlvidAccount({cfg: runtime.config as CoreConfig, accountId});
-
-        if (!olvidAccount) {
-          throw new Error(`No configuration found for account ID: ${accountId}`);
-        }
-
-        const client = new OlvidClient({clientKey: olvidAccount.clientKey, serverUrl: olvidAccount.daemonUrl});
-        const result: { content: any, details: string; } = {
-          content: [],
-          details: "List of discussion with Id and Title."
-        };
-        for await (const discussion of client.discussionList()) {
-          result.content.push({type: "text", "text": `id:${discussion.id},title:${discussion.title}`});
-        }
-        return result;
-      }
-  }]
+  agentTools: olvidAgentTools
 }
