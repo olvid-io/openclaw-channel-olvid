@@ -94,7 +94,8 @@ class OpenClawBot extends OlvidClient {
       accountId: this.account.accountId,
       peer: {
         id: message.discussionId.toString(),
-        kind: isGroup ? "group" : "dm",
+        kind: "channel", // always return channel, to create one session per discussion
+        // kind: isGroup ? "group" : "dm",
       },
     });
 
