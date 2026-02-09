@@ -1,6 +1,6 @@
 {
   "name": "olvid-channel",
-  "version": "0.0.0-a4",
+  "version": "0.0.0-a5",
   "description": "Olvid native channel for OpenClaw.",
   "type": "module",
   "dependencies": {
@@ -14,7 +14,7 @@
     "openclaw": "2026.2.1"
   },
   "scripts": {
-    "build": "npx tsc"
+    "publishSkill": "npx clawhub login && npx clawhub publish `pwd` --version '0.0.0-a5' --name 'Olvid Channel'"
   },
   "keywords": [
     "openclaw",

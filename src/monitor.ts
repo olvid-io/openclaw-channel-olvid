@@ -1,4 +1,4 @@
-import type { ChannelAccountSnapshot, RuntimeEnv, OpenClawConfig } from "openclaw/plugin-sdk";
+import type {ChannelAccountSnapshot, RuntimeEnv, OpenClawConfig, ReplyPayload} from "openclaw/plugin-sdk";
 import { datatypes, OlvidClient } from "@olvid/bot-node";
 import { ResolvedOlvidAccount, resolveOlvidAccount } from "./accounts.js";
 import { getOlvidRuntime } from "./runtime.js";
@@ -152,13 +152,17 @@ class OpenClawBot extends OlvidClient {
       ctx: ctxPayload,
       cfg: this.cfg,
       dispatcherOptions: {
-        deliver: async (payload) => {
+        deliver: async (payload: ReplyPayload) => {
+          if (payload.replyToCurrent) {
+            payload.replyToId = messageIdToString(message.id);
+          }
           await deliverOlvidReply({
             payload: payload as {
               text?: string;
               mediaUrls?: string[];
               mediaUrl?: string;
               replyToId?: string;
+              replyToCurrent?: boolean
             },
             accountId: this.account.accountId,
             discussionId: discussion.id,
