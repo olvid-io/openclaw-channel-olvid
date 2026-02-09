@@ -20,7 +20,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_list_discussions",
         label: "Olvid List Discussions",
-        description: "List your Olvid discussions.",
+        description: "Shows a list of every discussion (private or group) that belongs to **your** Olvid profile, including IDs, titles, and participant details.",
         parameters: Type.Object({
             olvidChannelAccountId: Type.Optional(Type.String())
         }),
@@ -28,7 +28,7 @@ export const olvidAgentTools = [
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
             const result: { content: any, details: string; } = {
                 content: [],
-                details: "List of your discussions in Olvid."
+                details: "List of my discussions in Olvid."
             };
             for await (const discussion of client.discussionList()) {
                 result.content.push({type: "text", text: JSON.stringify(discussion.toJson())});
@@ -40,7 +40,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_list_contacts",
         label: "Olvid List Contacts",
-        description: "List your Olvid Contacts",
+        description: "Returns the full contact list for **your** Olvid profile, with each contact’s ID, name and status.",
         parameters: Type.Object({
             olvidChannelAccountId: Type.Optional(Type.String())
         }),
@@ -48,7 +48,7 @@ export const olvidAgentTools = [
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
             const result: { content: any, details: string; } = {
                 content: [],
-                details: "List of your Olvid contacts"
+                details: "Olvid contacts list."
             };
             for await (const contact of client.contactList()) {
                 result.content.push({type: "text", text: JSON.stringify(contact.toJson())});
@@ -60,7 +60,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_list_groups",
         label: "Olvid List Groups",
-        description: "List your Olvid Groups",
+        description: "Lists every Olvid groups that **you** are a member of, including group IDs, names, and member lists.",
         parameters: Type.Object({
             olvidChannelAccountId: Type.Optional(Type.String())
         }),
@@ -68,7 +68,7 @@ export const olvidAgentTools = [
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
             const result: { content: any, details: string; } = {
                 content: [],
-                details: "List of your Olvid groups"
+                details: "List of my Olvid groups"
             };
             for await (const contact of client.groupList()) {
                 result.content.push({type: "text", text: JSON.stringify(contact.toJson())});
@@ -80,7 +80,7 @@ export const olvidAgentTools = [
     {
         name: "start_olvid_call",
         label: "Start Olvid Call",
-        description: "Start an olvid call in a discussion",
+        description: "Initiates a voice/video call inside any discussion that **belongs to you** (private or group). Returns the call ID.",
         parameters: Type.Object({
             olvidChannelAccountId: Type.Optional(Type.String()),
             discussionId: Type.Number()
@@ -100,8 +100,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_identity_set_photo",
         label: "Olvid Identity Set Photo",
-        description: "rpc service: IdentityCommandService, method: IdentitySetPhoto",
-        parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), filePath: Type.String()}),
+        description: "Updates the **profile picture** for your own Olvid profile. Supplies the file path of the new image.",        parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), filePath: Type.String()}),
         async execute(_id: string, params: unknown) {
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
             const filePath: string = (params as {filePath: string}).filePath;
@@ -117,7 +116,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_group_set_photo",
         label: "Olvid Group Set Photo",
-        description: "rpc service: GroupCommandService, method: GroupSetPhoto",
+        description: "Changes the avatar of an Olvid group you manage. Requires the group’s ID and the photo file path.",
         parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), groupId: Type.Number(), filePath: Type.String()}),
         async execute(_id: string, params: unknown) {
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
@@ -135,7 +134,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_group_add_member",
         label: "Olvid Group Add Member",
-        description: "rpc service: GroupCommandService, method: GroupAddMember",
+        description: "Adds a contact (by ID) to an Olvid group **you’re an admin of**, therefore giving you control over group membership.",
         parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), groupId: Type.Number(), contactIdToAdd: Type.Number(), filePath: Type.String()}),
         async execute(_id: string, params: unknown) {
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
@@ -155,7 +154,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_group_kick_member",
         label: "Olvid Group Kick Member",
-        description: "rpc service: GroupCommandService, method: GroupKickMember",
+        description: "Removes a contact from an Olvid group you admin.",
         parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), groupId: Type.Number(), contactIdToKick: Type.Number(), filePath: Type.String()}),
         async execute(_id: string, params: unknown) {
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
@@ -175,7 +174,7 @@ export const olvidAgentTools = [
     {
         name: "create_olvid_group",
         label: "Create Olvid Group",
-        description: "Create an olvid group discussion",
+        description: "Creates a new Olvid group under **your** Olvid profile. Specify the group name and the IDs of the initial members.",
         parameters: Type.Object({
             olvidChannelAccountId: Type.Optional(Type.String()),
             groupName: Type.String(),
@@ -197,7 +196,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_group_disband",
         label: "Olvid Group Disband",
-        description: "rpc service: GroupCommandService, method: GroupDisband",
+        description: "Disband an Olvid group that you are member of.",
         parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), groupId: Type.Number()}),
         async execute(_id: string, params: unknown) {
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
@@ -215,7 +214,7 @@ export const olvidAgentTools = [
     {
         name: "olvid_group_leave",
         label: "Olvid Group Leave",
-        description: "rpc service: GroupCommandService, method: GroupLeave",
+        description: "Leaves an Olvid group that you’re a member of. The group remains for others, but you cease to see its updates.",
         parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), groupId: Type.Number()}),
         async execute(_id: string, params: unknown) {
             const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
