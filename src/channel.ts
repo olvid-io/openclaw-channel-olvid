@@ -163,6 +163,7 @@ export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
         config: ctx.cfg as CoreConfig,
         runtime: ctx.runtime,
         abortSignal: ctx.abortSignal,
+        logger: ctx.log,
         statusSink: (patch: Partial<ChannelAccountSnapshot>) =>
             ctx.setStatus({ accountId: ctx.accountId, ...patch }),
       });
