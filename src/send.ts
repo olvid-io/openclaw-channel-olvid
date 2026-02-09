@@ -19,6 +19,10 @@ export type OlvidSendResult = {
   timestamp?: number;
 };
 
+/*
+** send a message in Olvid Channel
+** As a native channel this method expects a message body and optional media Url as the agent can answer to the user request with some medias.
+ */
 export async function sendMessageOlvid(
   to: string,
   text: string,
@@ -39,10 +43,6 @@ export async function sendMessageOlvid(
   if (!discussionId) {
     throw new Error(`Cannot parse discussion id: ${to}`);
   }
-
-  // TODO TODEL
-  logger.info(`sendMessageOlvid: ${opts.mediaUrls}`);
-  console.log(opts.mediaUrls);
 
   let message: datatypes.Message;
   if (opts.mediaUrls) {
