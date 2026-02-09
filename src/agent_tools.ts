@@ -3,7 +3,6 @@ import {ResolvedOlvidAccount, resolveOlvidAccount} from "./accounts";
 import {CoreConfig} from "./types";
 import {datatypes, OlvidClient} from "@olvid/bot-node";
 import { Type } from "@sinclair/typebox";
-import {isUploadPathValid} from "./tools";
 
 function getOlvidClient(olvidChannelAccountId?: string): OlvidClient {
     const runtime = getOlvidRuntime();
@@ -18,41 +17,6 @@ function getOlvidClient(olvidChannelAccountId?: string): OlvidClient {
 }
 
 export const olvidAgentTools = [
-    {
-        name: "olvid_post_message",
-        label: "Olvid Post Message",
-        description: "Post a message in an Olvid discussion that belongs to the Agent profile. Supplies message body and/or files path to attachments. Files must be in .openclaw/olvid-uploads directory for security reasons.",
-        parameters: Type.Object({
-            olvidChannelAccountId: Type.Optional(Type.String()),
-            discussionId: Type.Number(),
-            text: Type.Optional(Type.String()),
-            filePaths: Type.Optional(Type.Array(Type.String())),
-        }),
-        async execute(_id: string, params: unknown) {
-            const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
-            const discussionId: number = (params as {discussionId: number}).discussionId;
-            const text = (params as {text?: string}).text ?? undefined;
-            const originalFilePaths = (params as {filePaths?: string[]}).filePaths ?? [];
-
-            // check arguments
-            if (!text && !originalFilePaths) {
-                throw new Error("Must specify at least a text message or a file path");
-            }
-            // check files are in a specific directory, and we are not exfiltrating data
-            let filesPath: string[] = [];
-            for (const filePath of originalFilePaths) {
-                filesPath.push(isUploadPathValid(filePath));
-            }
-
-            const result: { content: any, details: string; } = {
-                content: [],
-                details: "Sent message."
-            };
-            await client.messageSendWithAttachmentsFiles({discussionId: BigInt(discussionId), body: text ?? "", filesPath: filesPath});
-            client.stop();
-            return result;
-        }
-    },
     {
         name: "olvid_list_discussions",
         label: "Olvid List Discussions",
@@ -128,49 +92,6 @@ export const olvidAgentTools = [
             const result: { content: any, details: string; } = {
                 content: [{type: "text", text: callId}],
                 details: "Call identifier."
-            };
-            client.stop();
-            return result;
-        }
-    },
-    {
-        name: "olvid_identity_set_photo",
-        label: "Olvid Identity Set Photo",
-        description: "Updates the **profile picture** for your own Olvid profile. Supplies the file path of the new image. Image must be in .openclaw/olvid-uploads directory for security reasons.",
-        parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), filePath: Type.String()}),
-        async execute(_id: string, params: unknown) {
-            const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
-            const filePath: string = (params as {filePath: string}).filePath;
-
-            // check files are in a specific directory, and we are not exfiltrating data
-            let cleanFilePath: string = isUploadPathValid(filePath);
-
-            const ret = await client.identitySetPhoto({filePath: cleanFilePath});
-            const result: { content: any, details: string; } = {
-                content: [{type: "text", text: JSON.stringify(ret)}],
-                details: "Result of IdentityPhotoUpdate method."
-            };
-            client.stop();
-            return result;
-        }
-    },
-    {
-        name: "olvid_group_set_photo",
-        label: "Olvid Group Set Photo",
-        description: "Changes the avatar of an Olvid group you manage. Requires the group’s ID and the photo file path. Image must be in .openclaw/olvid-uploads directory for security reasons.",
-        parameters: Type.Object({olvidChannelAccountId: Type.Optional(Type.String()), groupId: Type.Number(), filePath: Type.String()}),
-        async execute(_id: string, params: unknown) {
-            const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
-            const groupId: number = (params as {groupId: number}).groupId;
-            const filePath: string = (params as {filePath: string}).filePath;
-
-            // check files are in a specific directory, and we are not exfiltrating data
-            let cleanFilePath: string = isUploadPathValid(filePath);
-
-            const ret = await client.groupSetPhoto({groupId: BigInt(groupId), filePath: cleanFilePath});
-            const result: { content: any, details: string; } = {
-                content: [{type: "text", text: JSON.stringify(ret)}],
-                details: "Result of GroupSetPhoto method."
             };
             client.stop();
             return result;

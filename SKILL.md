@@ -1,10 +1,17 @@
 ---
 name: olvid-channel
-version: 0.0.0-a5
+version: 0.0.0-a9
 description: Add a native Olvid channel in OpenClaw.
 homepage: https://doc.bot.olvid.io/openclaw
 metadata: {"openclaw":{"emoji":"🗨️","category":"communication"}}
 ---
+
+# Send message 
+When channel have been configured agent can use openclaw cli to post messages in Olvid discussions. Example of commands:
+```bash
+openclaw message send --channel olvid -t olvid:${olvid_discussion_id} --message "Hello there"
+openclaw message send --channel olvid -t olvid:${olvid_discussion_id} --media /tmp/image.jpg
+```
 
 # Olvid Channel Skill
 
@@ -16,9 +23,6 @@ The agent can also perform actions with its own profile, for example:
 - 📇 List its contacts
 - 👥 List its groups
 - 🎥 Start a call within any discussion
-- 💬 Send messages to any discussion or contact
-- ✏️ Update its Olvid profile photo
-- 📸 Update a group avatar
 - 🗂️ Create new groups
 - 👥 Add or remove members from groups you administer
 - 🚪 Disband or leave existing groups
