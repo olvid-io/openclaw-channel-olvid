@@ -1,0 +1,9 @@
+version: v2
+clean: true
+
+inputs:
+  - directory: ./protobuf
+plugins:
+  - local: ["npx", "tsx", "./generate/protoc-gen-agent-tools.ts"]
+    opt: target=ts
+    out: ./src/generate

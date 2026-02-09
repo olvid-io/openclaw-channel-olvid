@@ -8,12 +8,17 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@bufbuild/buf": "^1.57.2",
+    "@bufbuild/protoc-gen-es": "^2.8.0",
+    "tsx": "^4.20.6"
   },
   "peerDependencies": {
     "openclaw": "2026.2.1"
   },
   "scripts": {
+    "generate": "npx buf generate",
+    "build": "npx tsc",
     "publish": "npm publish --access public && npx clawhub publish"
   },
   "keywords": [
