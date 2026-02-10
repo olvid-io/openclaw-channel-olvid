@@ -1,20 +1,8 @@
-import {getOlvidRuntime} from "./runtime";
-import {ResolvedOlvidAccount, resolveOlvidAccount} from "./accounts";
-import {CoreConfig} from "./types";
-import {datatypes, OlvidClient} from "@olvid/bot-node";
+import {datatypes} from "@olvid/bot-node";
 import { Type } from "@sinclair/typebox";
-
-function getOlvidClient(olvidChannelAccountId?: string): OlvidClient {
-    const runtime = getOlvidRuntime();
-    const config = runtime.config.loadConfig();
-
-    // Retrieve the configuration/credentials for the specific olvidChannelAccountId, or fallback to default
-    let olvidAccount: ResolvedOlvidAccount = resolveOlvidAccount({cfg: config as CoreConfig, accountId: olvidChannelAccountId ?? "default"});
-    if (!olvidAccount || !olvidAccount.daemonUrl || !olvidAccount.clientKey) {
-        olvidAccount = resolveOlvidAccount({cfg: config as CoreConfig, accountId: "default"});
-    }
-    return new OlvidClient({clientKey: olvidAccount.clientKey, serverUrl: olvidAccount.daemonUrl});
-}
+import {getOlvidClient, stringifyDatatypesEntity} from "./tools";
+import * as fs from "node:fs";
+import {getOlvidRuntime} from "./runtime";
 
 export const olvidAgentTools = [
     {
@@ -31,7 +19,7 @@ export const olvidAgentTools = [
                 details: "List of my discussions in Olvid."
             };
             for await (const discussion of client.discussionList()) {
-                result.content.push({type: "text", text: JSON.stringify(discussion.toJson())});
+                result.content.push({type: "text", text: stringifyDatatypesEntity(discussion)});
             }
             client.stop();
             return result;
@@ -51,7 +39,7 @@ export const olvidAgentTools = [
                 details: "Olvid contacts list."
             };
             for await (const contact of client.contactList()) {
-                result.content.push({type: "text", text: JSON.stringify(contact.toJson())});
+                result.content.push({type: "text", text: stringifyDatatypesEntity(contact)});
             }
             client.stop();
             return result;
@@ -71,7 +59,7 @@ export const olvidAgentTools = [
                 details: "List of my Olvid groups"
             };
             for await (const contact of client.groupList()) {
-                result.content.push({type: "text", text: JSON.stringify(contact.toJson())});
+                result.content.push({type: "text", text: stringifyDatatypesEntity(contact)});
             }
             client.stop();
             return result;
@@ -110,7 +98,7 @@ export const olvidAgentTools = [
             group.members.push(new datatypes.GroupMember({contactId: BigInt(contactIdToAdd)}));
             const ret = await client.groupUpdate({group: group});
             const result: { content: any, details: string; } = {
-                content: [{type: "text", text: JSON.stringify(ret)}],
+                content: [{type: "text", text: stringifyDatatypesEntity(ret)}],
                 details: "Result of GroupAddMember method."
             };
             client.stop();
@@ -130,7 +118,7 @@ export const olvidAgentTools = [
             group.members = group.members.filter(m => m.contactId !== BigInt(contactIdToKick));
             const ret = await client.groupUpdate({group: group});
             const result: { content: any, details: string; } = {
-                content: [{type: "text", text: JSON.stringify(ret)}],
+                content: [{type: "text", text: stringifyDatatypesEntity(ret)}],
                 details: "Result of GroupKickMember method."
             };
             client.stop();
@@ -152,7 +140,7 @@ export const olvidAgentTools = [
             const contactIds: number[] = (params as {contactIds: number[]}).contactIds;
             let group = await client.groupNewStandardGroup({name: groupName, adminContactIds: contactIds.map(cid => BigInt(cid))});
             const result: { content: any, details: string; } = {
-                content: [{type: "text", text: JSON.stringify(group.toJson())}],
+                content: [{type: "text", text: stringifyDatatypesEntity(group)}],
                 details: "Create group."
             };
             client.stop();
@@ -169,7 +157,7 @@ export const olvidAgentTools = [
             const groupId: number = (params as {groupId: number}).groupId;
             const ret = await client.groupDisband({groupId: BigInt(groupId)});
             const result: { content: any, details: string; } = {
-                content: [{type: "text", text: JSON.stringify(ret)}],
+                content: [{type: "text", text: stringifyDatatypesEntity(ret)}],
                 details: "Result of GroupDisband method."
             };
             client.stop();
@@ -187,11 +175,65 @@ export const olvidAgentTools = [
             const groupId: number = (params as {groupId: number}).groupId;
             const ret = await client.groupLeave({groupId: BigInt(groupId)})
             const result: { content: any, details: string; } = {
-                content: [{type: "text", text: JSON.stringify(ret)}],
+                content: [{type: "text", text: stringifyDatatypesEntity(ret)}],
                 details: "Result of GroupLeave method."
             };
             client.stop();
             return result;
         }
-    }
+    },
+    {
+        name: "olvid_identity_photo_set",
+        label: "Olvid Identity Photo Set",
+        description: "Change identity photo for Agent Olvid profile. File must point to a valid local png or jpg image.",
+        parameters: Type.Object({imagePath: Type.Optional(Type.String())}),
+        async execute(_id: string, params: unknown) {
+            const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
+            const imagePath: string = (params as {imagePath: string}).imagePath;
+            // validate image is valid
+            if (!fs.existsSync(imagePath)) {
+                throw new Error("Image path does not exist");
+            }
+            const runtime = getOlvidRuntime();
+            const mimeType = await runtime.media.detectMime({filePath: imagePath});
+            if (!mimeType?.startsWith("image/")) {
+                throw new Error("You must pass an image file");
+            }
+
+            await client.identitySetPhoto({filePath: imagePath})
+            const result: { content: any, details: string; } = {
+                content: [],
+                details: "Result of Olvid Identity Photo Set method."
+            };
+            client.stop();
+            return result;
+        }
+    },
+    {
+        name: "olvid_group_photo_set",
+        label: "Olvid Group Photo Set",
+        description: "Change group photo for an group you have admin permissions. File must point to a valid local png or jpg image.",
+        parameters: Type.Object({imagePath: Type.Optional(Type.String())}),
+        async execute(_id: string, params: unknown) {
+            const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
+            const imagePath: string = (params as {imagePath: string}).imagePath;
+            // validate image is valid
+            if (!fs.existsSync(imagePath)) {
+                throw new Error("Image path does not exist");
+            }
+            const runtime = getOlvidRuntime();
+            const mimeType = await runtime.media.detectMime({filePath: imagePath});
+            if (!mimeType?.startsWith("image/")) {
+                throw new Error("You must pass an image file");
+            }
+
+            await client.identitySetPhoto({filePath: imagePath})
+            const result: { content: any, details: string; } = {
+                content: [],
+                details: "Result of Olvid Identity Photo Set method."
+            };
+            client.stop();
+            return result;
+        }
+    },
 ]

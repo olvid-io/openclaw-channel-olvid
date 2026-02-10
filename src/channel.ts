@@ -17,6 +17,10 @@ import {monitorOlvidProvider} from "./monitor";
 import {olvidOnboardingAdapter} from "./onboarding";
 import {looksLikeOlvidTargetId, normalizeOlvidMessagingTarget} from "./normalize";
 import {olvidAgentTools} from "./agent_tools";
+import {OlvidDirectoryAdapter} from "./directory";
+import {OlvidSetupAdapter} from "./setup";
+import {OlvidActionsAdapter} from "./actions";
+import {discussionIdToString, messageIdToString} from "./tools";
 
 export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
   id: "olvid",
@@ -75,12 +79,12 @@ export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
     normalizeTarget: normalizeOlvidMessagingTarget,
     targetResolver: {
       looksLikeId: looksLikeOlvidTargetId,
-      hint: "olvid:discussionId"
+      hint: "olvid:discussion:DISCUSSION_ID | olvid:group:GROUP_ID | olvid:contact:CONTACT_ID"
     }
   },
-  directory: {}, // todo implements
-  actions: {}, // todo implements
-  // setup: {}, // todo implements
+  directory: OlvidDirectoryAdapter,
+  actions: OlvidActionsAdapter,
+  setup: OlvidSetupAdapter,
   outbound: {
     deliveryMode: "direct",
     chunker: (text: string, limit: number): string[] => {
@@ -89,19 +93,29 @@ export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
     chunkerMode: "markdown",
     textChunkLimit: 4000,
     sendText: async ({ to, text, accountId, replyToId }) => {
-      const result = await sendMessageOlvid(to, text, {
+      const sentMessage = await sendMessageOlvid(to, text, {
         accountId: accountId ?? undefined,
         replyTo: replyToId ?? undefined,
       });
-      return { channel: "olvid", ...result };
+      return {
+        channel: "olvid",
+        messageId: messageIdToString(sentMessage.id),
+        chatId: discussionIdToString(sentMessage.discussionId),
+        timestamp: Number(sentMessage.timestamp)
+      };
     },
     sendMedia: async ({ to, text, mediaUrl, accountId, replyToId }) => {
-      const result = await sendMessageOlvid(to, text, {
+      const sentMessage = await sendMessageOlvid(to, text, {
         accountId: accountId ?? undefined,
         replyTo: replyToId ?? undefined,
         mediaUrls: mediaUrl ? [mediaUrl] : undefined,
       });
-      return { channel: "olvid", ...result };
+      return {
+        channel: "olvid",
+        messageId: messageIdToString(sentMessage.id),
+        chatId: discussionIdToString(sentMessage.discussionId),
+        timestamp: Number(sentMessage.timestamp)
+      };
     },
   },
   status: {
