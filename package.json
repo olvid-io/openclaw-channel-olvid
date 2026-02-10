@@ -12,7 +12,7 @@
   },
   "peerDependencies": {
     "openclaw": "2026.2.6-3"
-  }
+  },
   "keywords": [
     "openclaw",
     "channel",
