@@ -82,8 +82,8 @@ export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
       hint: "olvid:discussion:DISCUSSION_ID | olvid:group:GROUP_ID | olvid:contact:CONTACT_ID"
     }
   },
-  directory: OlvidDirectoryAdapter,
-  actions: OlvidActionsAdapter,
+  // directory: OlvidDirectoryAdapter,
+  // actions: OlvidActionsAdapter,
   setup: OlvidSetupAdapter,
   outbound: {
     deliveryMode: "direct",
