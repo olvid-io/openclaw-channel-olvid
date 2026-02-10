@@ -16,7 +16,6 @@ import {sendMessageOlvid} from "./send";
 import {monitorOlvidProvider} from "./monitor";
 import {olvidOnboardingAdapter} from "./onboarding";
 import {looksLikeOlvidTargetId, normalizeOlvidMessagingTarget} from "./normalize";
-import {olvidAgentTools} from "./agent_tools";
 import {OlvidSetupAdapter} from "./setup";
 import {discussionIdToString, messageIdToString} from "./tools";
 
@@ -184,5 +183,4 @@ export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
       ctx.setStatus({ accountId: ctx.accountId, lastStopAt: Date.now() });
     },
   },
-  agentTools: olvidAgentTools
 }
