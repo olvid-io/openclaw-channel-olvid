@@ -1,8 +1,6 @@
 import {datatypes} from "@olvid/bot-node";
 import { Type } from "@sinclair/typebox";
 import {getOlvidClient, stringifyDatatypesEntity} from "./tools";
-import * as fs from "node:fs";
-import {getOlvidRuntime} from "./runtime";
 
 export const olvidAgentTools = [
     {
@@ -181,59 +179,5 @@ export const olvidAgentTools = [
             client.stop();
             return result;
         }
-    },
-    {
-        name: "olvid_identity_photo_set",
-        label: "Olvid Identity Photo Set",
-        description: "Change identity photo for Agent Olvid profile. File must point to a valid local png or jpg image.",
-        parameters: Type.Object({imagePath: Type.Optional(Type.String())}),
-        async execute(_id: string, params: unknown) {
-            const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
-            const imagePath: string = (params as {imagePath: string}).imagePath;
-            // validate image is valid
-            if (!fs.existsSync(imagePath)) {
-                throw new Error("Image path does not exist");
-            }
-            const runtime = getOlvidRuntime();
-            const mimeType = await runtime.media.detectMime({filePath: imagePath});
-            if (!mimeType?.startsWith("image/")) {
-                throw new Error("You must pass an image file");
-            }
-
-            await client.identitySetPhoto({filePath: imagePath})
-            const result: { content: any, details: string; } = {
-                content: [],
-                details: "Result of Olvid Identity Photo Set method."
-            };
-            client.stop();
-            return result;
-        }
-    },
-    {
-        name: "olvid_group_photo_set",
-        label: "Olvid Group Photo Set",
-        description: "Change group photo for an group you have admin permissions. File must point to a valid local png or jpg image.",
-        parameters: Type.Object({imagePath: Type.Optional(Type.String())}),
-        async execute(_id: string, params: unknown) {
-            const client = getOlvidClient((params as {olvidChannelAccountId: string}).olvidChannelAccountId);
-            const imagePath: string = (params as {imagePath: string}).imagePath;
-            // validate image is valid
-            if (!fs.existsSync(imagePath)) {
-                throw new Error("Image path does not exist");
-            }
-            const runtime = getOlvidRuntime();
-            const mimeType = await runtime.media.detectMime({filePath: imagePath});
-            if (!mimeType?.startsWith("image/")) {
-                throw new Error("You must pass an image file");
-            }
-
-            await client.identitySetPhoto({filePath: imagePath})
-            const result: { content: any, details: string; } = {
-                content: [],
-                details: "Result of Olvid Identity Photo Set method."
-            };
-            client.stop();
-            return result;
-        }
-    },
+    }
 ]

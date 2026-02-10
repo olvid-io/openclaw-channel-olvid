@@ -17,9 +17,7 @@ import {monitorOlvidProvider} from "./monitor";
 import {olvidOnboardingAdapter} from "./onboarding";
 import {looksLikeOlvidTargetId, normalizeOlvidMessagingTarget} from "./normalize";
 import {olvidAgentTools} from "./agent_tools";
-import {OlvidDirectoryAdapter} from "./directory";
 import {OlvidSetupAdapter} from "./setup";
-import {OlvidActionsAdapter} from "./actions";
 import {discussionIdToString, messageIdToString} from "./tools";
 
 export let olvidPlugin: ChannelPlugin<ResolvedOlvidAccount> = {
