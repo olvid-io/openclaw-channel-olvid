@@ -11,7 +11,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "openclaw": "2026.2.6-3"
+    "openclaw": "2026.2.9"
   },
   "keywords": [
     "openclaw",
